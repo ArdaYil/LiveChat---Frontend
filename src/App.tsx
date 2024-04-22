@@ -1,3 +1,5 @@
+import "../cssDist/index.css";
+
 function App() {
   return (
     <>
