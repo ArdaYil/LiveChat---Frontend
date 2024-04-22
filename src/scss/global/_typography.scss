@@ -1,0 +1,10 @@
+@use "../util" as u;
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+body {
+    font-family: "Open sans";
+}
+
+h1, h2, h3, h4, h5, h6, p, a {
+    font-size: u.rem(16);
+}

@@ -1,0 +1,10 @@
+@use "../util" as u;
+
+.text-input {
+    padding: u.em(5) u.em(7);
+    font-size: u.rem(18);
+    width: 50%;
+    outline: none;
+    border-radius: u.em(5);
+    border: none;
+}
