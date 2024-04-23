@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import useUserStore from "../stores/userStore";
 import Button from "./common/form/Button";
 import TextInput from "./common/form/TextInput";
 
 const UserForm = () => {
   const [visible, setVisible] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
   const { username, setUsername } = useUserStore();
 
@@ -16,23 +17,38 @@ const UserForm = () => {
       throw new Error("Username cannot be greater than (20) characters");
   };
 
-  const handleEnter = () => {
+  const handleEnter = (e: FormEvent) => {
+    e.preventDefault();
+
     try {
       validate(username);
       setVisible(false);
-    } catch (ex) {}
+      setError("");
+    } catch (ex) {
+      if (ex instanceof Error) {
+        setError(ex.message);
+      }
+    }
   };
 
   const handleChange = (username: string) => setUsername(username);
 
   return (
-    <form style={{ display: visible ? "flex" : "none" }} className="user-form">
+    <form
+      style={{ display: visible ? "flex" : "none" }}
+      className="user-form"
+      onSubmit={handleEnter}
+    >
       <header>
         <h1 className="user-form__heading">Enter your name please</h1>
-        <TextInput onChange={handleChange}>Name...</TextInput>
+        <TextInput error={error} onChange={handleChange}>
+          Name...
+        </TextInput>
       </header>
       <footer>
-        <Button onClick={handleEnter}>Enter</Button>
+        <Button type={"submit"} className="user-form__button">
+          Enter
+        </Button>
       </footer>
     </form>
   );

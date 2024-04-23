@@ -1,16 +1,20 @@
 interface Props {
   children: string;
+  error: string;
   onChange: (data: string) => void;
 }
 
-const TextInput = ({ children, onChange }: Props) => {
+const TextInput = ({ children, error, onChange }: Props) => {
   return (
-    <input
-      className="text-input"
-      type="text"
-      placeholder={children}
-      onChange={(e) => onChange(e.target.value)}
-    />
+    <div className="text-input-container">
+      <input
+        className="text-input"
+        type="text"
+        placeholder={children}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <p className="input-error">{error}</p>
+    </div>
   );
 };
 

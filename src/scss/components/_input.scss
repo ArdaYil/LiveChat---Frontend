@@ -7,4 +7,10 @@
     outline: none;
     border-radius: u.em(5);
     border: none;
+    margin-bottom: u.em(10);
+}
+
+.input-error {
+    color: rgb(247, 55, 55);
+    margin-left: u.em(5);
 }

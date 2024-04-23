@@ -1,7 +1,7 @@
 @use "../util" as u;
 
 .button {
-    font-size: u.em(20);
+    font-size: u.rem(20);
     padding: u.em(5) u.em(15);
     border-radius: u.em(5);
     outline: none;
