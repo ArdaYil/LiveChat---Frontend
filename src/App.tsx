@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import "../cssDist/index.css";
 import UserForm from "./components/UserForm";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import io from "socket.io-client";
+import useWebSocket from "react-use-websocket";
 
 interface Message {
   sender: string;
@@ -11,25 +12,44 @@ interface Message {
 }
 
 function App() {
-  let stompClient = null;
+  const [username, setUsername] = useState("username");
+  // const { sendJsonMessage } = useWebSocket("ws://127.0.0.1:8080/chat.addUser", {
+  //   queryParams: { username },
+  // });
 
-  const displayMessage = (message: Message) => {
-    const paragraph = document.createElement("p");
-    paragraph.innerText = message.message;
+  // sendJsonMessage("test");
 
-    document.body.appendChild(paragraph);
+  useEffect(() => {
+    const ws = new WebSocket("ws://127.0.0.1:8080");
+
+    ws.onopen = () => {
+      console.log("Connect");
+    };
+  });
+
+  let stompClient: Stomp.Client | null = null;
+
+  const onMessageReceived = () => {};
+
+  const onConnect = () => {
+    if (!stompClient) return;
+
+    // stompClient.subscribe("/topic/public", onMessageReceived);
+    // stompClient.send(
+    //   "/app/chat.adduser",
+    //   {},
+    //   JSON.stringify({ sender: username, type: "JOIN" })
+    // );
   };
 
-  const handleConnect = () => {
-    const socket = io("ws://localhost:8080/chat.addUser");
+  const onError = () => {};
 
-    socket.on("connection", (socket) => {
-      console.log("Connected");
+  const handleConnect = (username: string) => {
+    setUsername(username);
 
-      socket.on("message", (text: Message) => {
-        displayMessage(text);
-      });
-    });
+    // const socket = new WebSocket("ws://127.0.0.1:8080");
+    // stompClient = Stomp.over(socket);
+    // stompClient.connect({}, onConnect, onError);
   };
 
   return (

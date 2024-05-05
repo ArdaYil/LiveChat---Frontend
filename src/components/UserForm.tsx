@@ -14,6 +14,7 @@ const UserForm = ({ onConnect }: Props) => {
   const { username, setUsername } = useUserStore();
 
   const validate = (username: string) => {
+    console.log("'" + username + "'");
     if (username == "") throw new Error("Username is required");
     if (username.length < 3)
       throw new Error("Username cannot be less than (3) characters");
@@ -25,7 +26,7 @@ const UserForm = ({ onConnect }: Props) => {
     e.preventDefault();
 
     try {
-      validate(username);
+      validate(removeSpaces(username));
       setVisible(false);
       setError("");
       onConnect(username);
@@ -36,7 +37,19 @@ const UserForm = ({ onConnect }: Props) => {
     }
   };
 
-  const handleChange = (username: string) => setUsername(username);
+  const removeSpaces = (str: string) => {
+    const array = str.split("");
+    let newStr = "";
+
+    array.forEach((char) => {
+      if (char == " ") return;
+      newStr += char;
+    });
+
+    return newStr;
+  };
+
+  const handleChange = (username: string) => setUsername(username.trim());
 
   return (
     <form
