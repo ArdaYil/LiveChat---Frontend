@@ -3,7 +3,11 @@ import useUserStore from "../stores/userStore";
 import Button from "./common/form/Button";
 import TextInput from "./common/form/TextInput";
 
-const UserForm = () => {
+interface Props {
+  onConnect: (username: string) => void;
+}
+
+const UserForm = ({ onConnect }: Props) => {
   const [visible, setVisible] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
@@ -24,6 +28,7 @@ const UserForm = () => {
       validate(username);
       setVisible(false);
       setError("");
+      onConnect(username);
     } catch (ex) {
       if (ex instanceof Error) {
         setError(ex.message);
