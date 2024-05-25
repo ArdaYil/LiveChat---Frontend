@@ -1,13 +1,26 @@
 import { create } from "zustand";
 
-interface UserStore {
+export interface User {
   username: string;
-  setUsername: (username: string) => void;
+  recieverName: string;
+  connected: boolean;
+  message: string;
+}
+
+interface UserStore {
+  user: User;
+  setUser: (user: Partial<User>) => void;
 }
 
 const useUserStore = create<UserStore>((set) => ({
-  username: "",
-  setUsername: (username) => set(() => ({ username })),
+  user: {
+    username: "",
+    recieverName: "",
+    connected: false,
+    message: "",
+  },
+  setUser: (user: Partial<User>) =>
+    set((state) => ({ user: { ...state.user, ...user } })),
 }));
 
 export default useUserStore;

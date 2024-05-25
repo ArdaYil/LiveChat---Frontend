@@ -1,60 +1,110 @@
 import { useEffect, useState } from "react";
 import "../cssDist/index.css";
 import UserForm from "./components/UserForm";
-import SockJS from "sockjs-client";
-import Stomp from "stompjs";
-import useWebSocket from "react-use-websocket";
+import useUserStore from "./stores/userStore";
+import { Client, Frame, Message, over } from "stompjs";
+import SockJS from "sockjs-client/dist/sockjs";
+import ActiveUsers from "./components/chat/ActiveUsers";
+import Chatroom from "./components/chat/Chatroom";
+import usePublicChatStores from "./stores/publicChatStore";
 
-interface Message {
-  sender: string;
+export interface ChatMessage {
+  senderName: string;
   message: string;
-  date: Date;
+  date: string;
+  status: "JOIN" | "MESSAGE" | "LEAVE";
 }
 
+let stompClient: Client | null = null;
+
+const connectionEndpoint = "http://localhost:8080/ws";
+
 function App() {
-  const [username, setUsername] = useState("username");
-  // const { sendJsonMessage } = useWebSocket("ws://127.0.0.1:8080/chat.addUser", {
-  //   queryParams: { username },
-  // });
+  const [publicChats, setPublicChats] = useState<ChatMessage[]>([]);
+  const [privateChats, setPrivateChats] = useState(
+    new Map<string, ChatMessage[]>()
+  );
+  const { user, setUser } = useUserStore();
 
-  // sendJsonMessage("test");
-
-  useEffect(() => {
-    const ws = new WebSocket("ws://127.0.0.1:8080");
-
-    ws.onopen = () => {
-      console.log("Connect");
-    };
-  });
-
-  let stompClient: Stomp.Client | null = null;
-
-  const onMessageReceived = () => {};
-
-  const onConnect = () => {
-    if (!stompClient) return;
-
-    // stompClient.subscribe("/topic/public", onMessageReceived);
-    // stompClient.send(
-    //   "/app/chat.adduser",
-    //   {},
-    //   JSON.stringify({ sender: username, type: "JOIN" })
-    // );
+  const handleRegisterUser = () => {
+    const sock = new SockJS(connectionEndpoint);
+    stompClient = over(sock);
+    stompClient.connect({}, onConnect, onError);
   };
 
-  const onError = () => {};
+  const onConnect = () => {
+    setUser({ connected: true });
+    stompClient?.subscribe("/chatroom/public", onPublicMessageReceived);
+    stompClient?.subscribe(
+      `/user/${user.username}/private`,
+      onPrivateMessageReceived
+    );
+  };
 
-  const handleConnect = (username: string) => {
-    setUsername(username);
+  function onPublicMessageReceived(payload: Message) {
+    console.log("Message");
+    const data: ChatMessage = JSON.parse(payload.body);
 
-    // const socket = new WebSocket("ws://127.0.0.1:8080");
-    // stompClient = Stomp.over(socket);
-    // stompClient.connect({}, onConnect, onError);
+    switch (data.status) {
+      case "JOIN":
+        break;
+
+      case "MESSAGE":
+        publicChats.unshift(data);
+        setPublicChats([...publicChats]);
+        break;
+
+      case "LEAVE":
+        break;
+    }
+  }
+
+  const onPrivateMessageReceived = (payload: Message) => {
+    console.log("Message");
+    const payloadData: ChatMessage = JSON.parse(payload.body);
+
+    if (privateChats.get(payloadData.senderName)) {
+      privateChats.get(payloadData.senderName)?.push(payloadData);
+      setPrivateChats(new Map(privateChats));
+    } else {
+      const list = [] as ChatMessage[];
+      list.push(payloadData);
+
+      privateChats.set(payloadData.senderName, list);
+      setPrivateChats(privateChats);
+    }
+  };
+
+  const onError = (exception: string | Frame) => {
+    console.log(exception);
+  };
+
+  const handleMessage = (message: string) => {
+    sendPublicMessage(message);
+  };
+
+  const sendPublicMessage = (message: string) => {
+    if (!stompClient) return;
+
+    const chatMessage: ChatMessage = {
+      senderName: user.username,
+      message,
+      date: new Date(),
+      status: "MESSAGE",
+    };
+
+    stompClient.send("/app/message", {}, JSON.stringify(chatMessage));
   };
 
   return (
     <>
-      <UserForm onConnect={handleConnect} />
+      {!user.connected && <UserForm onRegister={handleRegisterUser} />}
+      {user.connected && (
+        <div className="main">
+          <ActiveUsers activeUsers={privateChats} />
+          <Chatroom currentChat={publicChats} onChange={handleMessage} />
+        </div>
+      )}
     </>
   );
 }

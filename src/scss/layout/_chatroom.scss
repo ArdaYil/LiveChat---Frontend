@@ -1,0 +1,14 @@
+
+
+.chatroom-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.chatroom {
+    background-color: rgb(29, 29, 29);
+    border-radius: 20px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column-reverse;
+}

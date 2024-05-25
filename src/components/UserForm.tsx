@@ -1,20 +1,19 @@
 import { FormEvent, useState } from "react";
 import useUserStore from "../stores/userStore";
-import Button from "./common/form/Button";
-import TextInput from "./common/form/TextInput";
+import Button from "./form/Button";
+import TextInput from "./form/TextInput";
 
 interface Props {
-  onConnect: (username: string) => void;
+  onRegister: () => void;
 }
 
-const UserForm = ({ onConnect }: Props) => {
+const UserForm = ({ onRegister }: Props) => {
   const [visible, setVisible] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  const { username, setUsername } = useUserStore();
+  const { user, setUser } = useUserStore();
 
   const validate = (username: string) => {
-    console.log("'" + username + "'");
     if (username == "") throw new Error("Username is required");
     if (username.length < 3)
       throw new Error("Username cannot be less than (3) characters");
@@ -26,10 +25,10 @@ const UserForm = ({ onConnect }: Props) => {
     e.preventDefault();
 
     try {
-      validate(removeSpaces(username));
+      validate(removeSpaces(user.username));
       setVisible(false);
       setError("");
-      onConnect(username);
+      onRegister();
     } catch (ex) {
       if (ex instanceof Error) {
         setError(ex.message);
@@ -49,7 +48,8 @@ const UserForm = ({ onConnect }: Props) => {
     return newStr;
   };
 
-  const handleChange = (username: string) => setUsername(username.trim());
+  const handleChange = (username: string) =>
+    setUser({ username: username.trim() });
 
   return (
     <form
@@ -59,7 +59,11 @@ const UserForm = ({ onConnect }: Props) => {
     >
       <header>
         <h1 className="user-form__heading">Enter your name please</h1>
-        <TextInput error={error} onChange={handleChange}>
+        <TextInput
+          className="user-form__input"
+          error={error}
+          onChange={handleChange}
+        >
           Name...
         </TextInput>
       </header>

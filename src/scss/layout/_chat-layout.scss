@@ -1,0 +1,10 @@
+
+
+.main {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    padding-top: 50px;
+    max-width: 1500px;
+    padding-inline: 50px;
+    margin-inline: auto;
+}
