@@ -44,7 +44,7 @@
 .chat {
     &--sent {
         @extend %chat;
-        background-color: rgb(58, 58, 247);
+        background-color: #3a3af7;
         
     };
 
@@ -52,4 +52,10 @@
         @extend %chat;
         background-color: #926bfd;
     }
+}
+
+.join {
+    color: #78ff56;
+    background-color: rgba(1, 1, 1, 0);
+    padding-inline: 0;
 }

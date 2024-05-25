@@ -15,7 +15,7 @@ const Chatroom = ({ currentChat, onChange }: Props) => {
   const renderTime = (date: string) => {
     const dateObj = new Date(date);
     let minutes = dateObj.getMinutes().toString();
-    minutes = minutes.length >= 10 ? minutes : `0${minutes}`;
+    minutes = minutes.length >= 2 ? minutes : `0${minutes}`;
 
     return `${dateObj.getHours()}:${minutes}`;
   };
@@ -27,13 +27,14 @@ const Chatroom = ({ currentChat, onChange }: Props) => {
           console.log(username);
           console.log(chat);
           const currentUser = username === chat.senderName;
-
+          const chatClass = currentUser ? "chat--sent" : "chat--receieved";
+          console.log(chat.status);
           return (
             <div
               className={`chat-message ${currentUser ? "sent" : "receieved"}`}
             >
               <span className="chat-message__meta-data">
-                {!currentUser && (
+                {!(currentUser || chat.status == "JOIN") && (
                   <p className="chat-message__meta-data__sender">
                     {chat.senderName}
                   </p>
@@ -42,7 +43,11 @@ const Chatroom = ({ currentChat, onChange }: Props) => {
                   {renderTime(chat.date)}
                 </p>
               </span>
-              <p className={currentUser ? "chat--sent" : "chat--receieved"}>
+              <p
+                className={`${chatClass} ${
+                  chat.status == "JOIN" ? "join" : ""
+                }`}
+              >
                 {chat.message}
               </p>
             </div>

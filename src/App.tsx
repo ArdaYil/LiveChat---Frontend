@@ -8,11 +8,13 @@ import ActiveUsers from "./components/chat/ActiveUsers";
 import Chatroom from "./components/chat/Chatroom";
 import usePublicChatStores from "./stores/publicChatStore";
 
+type Status = "JOIN" | "MESSAGE" | "LEAVE";
 export interface ChatMessage {
   senderName: string;
   message: string;
   date: string;
-  status: "JOIN" | "MESSAGE" | "LEAVE";
+  receiverName: string;
+  status: Status;
 }
 
 let stompClient: Client | null = null;
@@ -39,24 +41,24 @@ function App() {
       `/user/${user.username}/private`,
       onPrivateMessageReceived
     );
+
+    sendPublicMessage(`${user.username} has joined the chat`, "JOIN");
+    //sendPrivateMessage(`${user.username} has joined the chat`, "JOIN");
   };
 
   function onPublicMessageReceived(payload: Message) {
     console.log("Message");
     const data: ChatMessage = JSON.parse(payload.body);
 
-    switch (data.status) {
-      case "JOIN":
-        break;
+    if (data.status == "JOIN") {
+      const list = [] as ChatMessage[];
 
-      case "MESSAGE":
-        publicChats.unshift(data);
-        setPublicChats([...publicChats]);
-        break;
-
-      case "LEAVE":
-        break;
+      privateChats.set(data.senderName, list);
+      setPrivateChats(privateChats);
     }
+
+    publicChats.unshift(data);
+    setPublicChats([...publicChats]);
   }
 
   const onPrivateMessageReceived = (payload: Message) => {
@@ -80,20 +82,43 @@ function App() {
   };
 
   const handleMessage = (message: string) => {
-    sendPublicMessage(message);
+    sendPublicMessage(message, "MESSAGE");
   };
 
-  const sendPublicMessage = (message: string) => {
-    if (!stompClient) return;
-
+  const getMessage = (message: string, status: Status, receiverName = "") => {
     const chatMessage: ChatMessage = {
       senderName: user.username,
       message,
-      date: new Date(),
-      status: "MESSAGE",
+      receiverName,
+      date: new Date().toISOString(),
+      status: status,
     };
 
-    stompClient.send("/app/message", {}, JSON.stringify(chatMessage));
+    return chatMessage;
+  };
+
+  const sendPublicMessage = (message: string, status: Status) => {
+    if (!stompClient) return;
+
+    stompClient.send(
+      "/app/message",
+      {},
+      JSON.stringify(getMessage(message, status))
+    );
+  };
+
+  const sendPrivateMessage = (
+    message: string,
+    status: Status,
+    receiverName: string
+  ) => {
+    if (!stompClient) return;
+
+    stompClient.send(
+      "/app/private-message",
+      {},
+      JSON.stringify(getMessage(message, status, receiverName))
+    );
   };
 
   return (
@@ -101,7 +126,7 @@ function App() {
       {!user.connected && <UserForm onRegister={handleRegisterUser} />}
       {user.connected && (
         <div className="main">
-          <ActiveUsers activeUsers={privateChats} />
+          <div />
           <Chatroom currentChat={publicChats} onChange={handleMessage} />
         </div>
       )}
