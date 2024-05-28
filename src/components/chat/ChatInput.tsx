@@ -24,7 +24,7 @@ const ChatInput = ({ onMessage }: Props) => {
       >
         Enter message...
       </TextInput>
-      <Button>Send</Button>
+      <Button type="submit">Send</Button>
     </form>
   );
 };
